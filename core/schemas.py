@@ -1,25 +1,43 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from decimal import Decimal
 from typing import Optional
 
 
-class CostBaseModel(BaseModel):
-    description: str = Field(..., description="field for manage the description of each cost")
-    amount : float | int = Field(..., description="amount that user should insert and it can be int or float")
-    
-    @field_validator('description')
-    @classmethod
-    def validate_description(cls, value: str):
-        if len(value) > 100:
-            raise ValueError("Length of the description should not be exceed 100")
-    
-    
-class CostCreateModel(CostBaseModel):
-    pass
-
-class CostReadModel(CostBaseModel):
-    id : int = Field(..., description="the identity field and it is created automatically")
+class CostBase(BaseModel):
+    description: str = Field(..., max_length=255)
+    amount: Decimal = Field(..., gt=0)
 
 
-class CostUpdateModel(BaseModel):
-    description: Optional[str] = Field(None, description="optional description for update")
-    amount: Optional[int | float] = Field(None, description="optional amount for update")
+class CostCreate(CostBase):
+    user_id: int = Field(..., gt=0)
+
+
+class CostUpdate(BaseModel):
+    description: Optional[str] = Field(None, max_length=255)
+    amount: Optional[Decimal] = Field(None, gt=0)
+
+
+class CostRead(CostBase):
+    id: int
+    user_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+
+class UserBase(BaseModel):
+    username: str = Field(..., max_length=30)
+    email: EmailStr
+
+
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=6)
+
+
+class UserRead(UserBase):
+    id: int
+    is_active: bool
+    is_verified: bool
+
+    model_config = ConfigDict(from_attributes=True)
