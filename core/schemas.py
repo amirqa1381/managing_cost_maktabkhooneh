@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, field_validator, ValidationInfo
 from decimal import Decimal
 from typing import Optional
+from datetime import datetime
+
 
 
 class CostBase(BaseModel):
@@ -26,18 +28,22 @@ class CostRead(CostBase):
 
 
 
-class UserBase(BaseModel):
-    username: str = Field(..., max_length=30)
-    email: EmailStr
+class UserRegisterSchema(BaseModel):
+    username: str = Field(..., max_length=250, description="username for registering")
+    email: str = Field(..., max_length=250, description="username for registering")
+    password: str = Field(..., max_length=150, description="the password of the user")
+    confirm_password: str = Field(
+        ..., max_length=150, description="the confirm password that user insert"
+    )
+
+    @field_validator("confirm_password")
+    @classmethod
+    def validate_password_input(cls, confirm_password: str, info: ValidationInfo):
+        if not confirm_password or confirm_password != info.data.get("password"):
+            raise ValueError("password does not match")
+        return confirm_password
 
 
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=6)
-
-
-class UserRead(UserBase):
-    id: int
-    is_active: bool
-    is_verified: bool
-
-    model_config = ConfigDict(from_attributes=True)
+class UserLoginSchema(BaseModel):
+    username: str = Field(..., max_length=250, description="username for registering")
+    password: str = Field(..., max_length=150, description="the password of the user")

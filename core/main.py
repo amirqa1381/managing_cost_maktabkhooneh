@@ -2,12 +2,14 @@
 from typing import Annotated
 from fastapi import FastAPI, status, Path, Depends, HTTPException
 from sqlalchemy.orm import Session
-from schemas import CostRead, CostCreate, CostUpdate, UserRead, UserCreate
+from schemas import CostRead, CostCreate, CostUpdate
 from models import Costs, Users
 from database_test import get_db
+from users_routes import router as user_routes
+
 app = FastAPI()
 
-
+app.include_router(user_routes)
 
 
 # GET method for getting specific cost or list of costs
@@ -87,16 +89,3 @@ def delete_specific_cost(cost_id: int, db: Session = Depends(get_db)):
 
 
 
-# Adding User for creating the Costs
-
-
-# here password does not hash and it is so simple for getting the user id for creating the costs
-@app.post("/user", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def create_user(request: UserCreate, db: Session= Depends(get_db)):
-    new_user = Users(**request.model_dump())
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    return new_user
