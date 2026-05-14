@@ -1,25 +1,31 @@
 from datetime import datetime, timezone
 from database_test import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, DateTime, Table,UniqueConstraint, Numeric
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    ForeignKey,
+    Text,
+    DateTime,
+    Table,
+    UniqueConstraint,
+    Numeric,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
 from passlib.context import CryptContext
 
-
-
-
 pwd_context = CryptContext(
     schemes=["argon2"],
     default="argon2",
     deprecated="auto",
-    argon2__memory_cost=65536,   # 64 MB
+    argon2__memory_cost=65536,  # 64 MB
     argon2__time_cost=3,
     argon2__parallelism=4,
 )
-
-
 
 
 class RefreshToken(Base):
@@ -36,7 +42,7 @@ class RefreshToken(Base):
 
 class Users(Base):
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(30), nullable=False, unique=True)
     email = Column(String(), nullable=False, unique=True)
@@ -48,10 +54,10 @@ class Users(Base):
 
     refresh_tokens = relationship("RefreshToken", back_populates="user")
     costs = relationship("Costs", back_populates="user", cascade="all, delete-orphan")
-    
+
     def __repr__(self):
         return f"(id={self.id} , username={self.username}, email={self.email})"
-    
+
     def hash_password(self, plain_password: str):
         """
         this method is for hashing the password of the user
@@ -59,11 +65,10 @@ class Users(Base):
         Args:
             plain_password (str): password that we pass for hashing
         """
-        
+
         hashed_password = pwd_context.hash(plain_password)
         return hashed_password
-    
-    
+
     def verify_password(self, plain_password: str):
         """
         this method is for verifying the passwords
@@ -72,8 +77,7 @@ class Users(Base):
             plain_password (str): this is the password that we get for checking
         """
         return pwd_context.verify(plain_password, str(self.password))
-        
-        
+
     def set_password(self, plain_password: str):
         """
         Method for setting the hash password for user
@@ -82,25 +86,16 @@ class Users(Base):
             plain_password (str): password that user insert
         """
         self.password = self.hash_password(plain_password)
-    
-    
-
-
-
-
-
-
 
 
 class Costs(Base):
     __tablename__ = "costs"
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(ForeignKey("users.id"), nullable=False, index=True)
     description = Column(String(255), nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
-    
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     user = relationship("Users", back_populates="costs")
-    

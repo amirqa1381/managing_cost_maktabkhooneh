@@ -4,7 +4,6 @@ from typing import Optional
 from datetime import datetime
 
 
-
 class CostBase(BaseModel):
     description: str = Field(..., max_length=255)
     amount: Decimal = Field(..., gt=0)
@@ -24,8 +23,6 @@ class CostRead(CostBase):
     user_id: int
 
     model_config = ConfigDict(from_attributes=True)
-
-
 
 
 class UserRegisterSchema(BaseModel):

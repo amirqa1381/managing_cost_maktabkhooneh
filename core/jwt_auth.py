@@ -8,7 +8,6 @@ from jose import jwt, JWTError
 from database_test import get_db
 from models import Users
 
-
 load_dotenv()
 
 secret_key = os.getenv("SECRET_KEY")
@@ -21,7 +20,6 @@ REFRESH_TOKEN_EXPIRE_DAYS = 2
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="/user/login")
 
 
-
 def access_token(subject: str):
     """
     function for creating the access token base on the subject that we get in other parts
@@ -31,9 +29,10 @@ def access_token(subject: str):
     payload = {"sub": subject, "exp": expire, "type": "access"}
     return jwt.encode(payload, str(secret_key), algorithm=str(algorithm))
 
+
 def create_refresh_token(subject: str):
     """
-    function for creating the refresh token 
+    function for creating the refresh token
     refresh token is for handling the user in a while
     """
     expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
@@ -45,14 +44,10 @@ def create_refresh_token(subject: str):
     return jwt.encode(payload, str(secret_key), algorithm=str(algorithm))
 
 
-
 def decode_token(token: str, expected_type: str):
     try:
-        payload = jwt.decode(
-            token,
-            str(secret_key),
-            algorithms=[str(algorithm)])
-        
+        payload = jwt.decode(token, str(secret_key), algorithms=[str(algorithm)])
+
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -66,7 +61,6 @@ def decode_token(token: str, expected_type: str):
         )
 
     return payload
-
 
 
 def get_current_user(
@@ -95,4 +89,3 @@ def get_current_user(
         )
 
     return user
-
