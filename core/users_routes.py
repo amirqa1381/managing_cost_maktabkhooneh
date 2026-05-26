@@ -3,7 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database_test import get_db
-from schemas import UserRegisterSchema, UserLoginSchema
+from exceptions import UnauthorizedException
+from schemas import UserRegisterSchema
 from models import Users, RefreshToken
 from jwt_auth import access_token, create_refresh_token, decode_token
 
@@ -35,9 +36,9 @@ async def sign_up_user(request: UserRegisterSchema, db: Session = Depends(get_db
 
 
 @router.post("/login", status_code=status.HTTP_200_OK)
-async def loin(
+async def login(
     response: Response,
-    request: OAuth2PasswordRequestForm,
+    request: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
     """
@@ -47,11 +48,7 @@ async def loin(
     user = db.query(Users).filter_by(username=request.username).first()
 
     if not user or not user.verify_password(request.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise UnauthorizedException("username or password was not correct!!")
 
     # create the refresh token
     refresh = create_refresh_token(str(user.username))
@@ -91,7 +88,7 @@ def refresh_token(
         db.query(RefreshToken).filter_by(token=refresh_token, revoked=False).first()
     )
     if not stored:
-        raise HTTPException(401, "Refresh token invalid or revoked")
+        raise UnauthorizedException("Refresh token invalid or revoked")
 
     # here we revoked the old token
     stored.revoked = True  # type: ignore
