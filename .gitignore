@@ -81,7 +81,7 @@ Temporary Items
 # .idea/modules
 # *.iml
 # *.ipr
-
+:memory
 # CMake
 cmake-build-*/
 

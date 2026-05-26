@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, status, HTTPException, Response, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from database_test import get_db
-from exceptions import UnauthorizedException
-from schemas import UserRegisterSchema
-from models import Users, RefreshToken
-from jwt_auth import access_token, create_refresh_token, decode_token
+from core.database_test import get_db
+from core.exceptions import UnauthorizedException
+from core.schemas import UserRegisterSchema
+from core.models import Users, RefreshToken
+from core.jwt_auth import create_access_token, create_refresh_token, decode_token
 
 router = APIRouter(prefix="/user", tags=["Users"])
 
@@ -32,7 +32,7 @@ async def sign_up_user(request: UserRegisterSchema, db: Session = Depends(get_db
     db.commit()
     db.refresh(new_user)
 
-    return JSONResponse(content={"id": new_user.id, "username": new_user.username})
+    return JSONResponse(content={"id": new_user.id, "username": new_user.username}, status_code=status.HTTP_201_CREATED)
 
 
 @router.post("/login", status_code=status.HTTP_200_OK)
@@ -68,7 +68,7 @@ async def login(
     )
 
     # return access token
-    return {"access_token": access_token(str(user.username)), "token_type": "Bearer"}
+    return {"access_token": create_access_token(str(user.username)), "token_type": "Bearer"}
 
 
 @router.post("/refresh")
@@ -107,7 +107,7 @@ def refresh_token(
         samesite="strict",
     )
 
-    return {"access_token": access_token(username), "token_type": "Bearer"}
+    return {"access_token": create_access_token(username), "token_type": "Bearer"}
 
 
 @router.post("/logout")

@@ -5,8 +5,8 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from database_test import get_db
-from models import Users
+from core.database_test import get_db
+from core.models import Users
 
 load_dotenv()
 
@@ -20,7 +20,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 2
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="/user/login")
 
 
-def access_token(subject: str):
+def create_access_token(subject: str):
     """
     function for creating the access token base on the subject that we get in other parts
 

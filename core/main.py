@@ -2,13 +2,13 @@ from typing import Annotated
 from fastapi import FastAPI, status, Path, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi_swagger import patch_fastapi
-from schemas import CostRead, CostCreate, CostUpdate
-from models import Costs, Users
-from database_test import get_db
-from users_routes import router as user_routes
-from jwt_auth import get_current_user
-from exception_handler import register_exception_handlers
-from exceptions import ExpenseNotFoundException
+from core.schemas import CostRead, CostCreate, CostUpdate
+from core.models import Costs, Users
+from core.database_test import get_db
+from core.users_routes import router as user_routes
+from core.jwt_auth import get_current_user
+from core.exception_handler import register_exception_handlers
+from core.exceptions import ExpenseNotFoundException
 
 app = FastAPI(docs_url=None, swagger_ui_oauth2_redirect_url=None)
 patch_fastapi(app, docs_url="/swagger")
@@ -21,8 +21,7 @@ register_exception_handlers(app)
 
 
 @app.get("/costs/{cost_id}", status_code=status.HTTP_200_OK, response_model=CostRead)
-def get_specific_cost(cost_id: int, token: str,db: Session = Depends(get_db)):
-    user = get_current_user(token, db)
+def get_specific_cost(cost_id: int, user: Users = Depends(get_current_user),db: Session = Depends(get_db)):
     cost = db.query(Costs).filter_by(id=cost_id, user_id=user.id).one_or_none()
 
     if cost is None:
@@ -32,11 +31,10 @@ def get_specific_cost(cost_id: int, token: str,db: Session = Depends(get_db)):
 
 
 @app.get("/costs", status_code=status.HTTP_200_OK, response_model=list[CostRead])
-def get_all_costs(token: str,db: Session = Depends(get_db)):
+def get_all_costs(user: Users = Depends(get_current_user),db: Session = Depends(get_db)):
     """
     function for getting the list of the Costs
     """
-    user = get_current_user(token, db)
     costs = db.query(Costs).filter_by(user_id=user.id).all()
     return costs
 
@@ -45,8 +43,7 @@ def get_all_costs(token: str,db: Session = Depends(get_db)):
 
 
 @app.post("/costs", status_code=status.HTTP_201_CREATED, response_model=CostRead)
-async def create_cost(request: CostCreate, token: str,db: Session = Depends(get_db)):
-    user = get_current_user(token=token, db=db)
+async def create_cost(request: CostCreate, user: Users = Depends(get_current_user),db: Session = Depends(get_db)):
     if request.user_id != user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"you don't have any access to create the cost for user with id {request.user_id}")
     new_cost = Costs(**request.model_dump())
@@ -65,6 +62,7 @@ async def create_cost(request: CostCreate, token: str,db: Session = Depends(get_
 async def update_specific_cost(
     cost_id: Annotated[int, Path(description="Cost ID to update")],
     request: CostUpdate,
+    user: Users = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     cost = db.query(Costs).filter_by(id=cost_id).first()
@@ -88,7 +86,7 @@ async def update_specific_cost(
 
 
 @app.delete("/costs/{cost_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_specific_cost(cost_id: int, db: Session = Depends(get_db)):
+def delete_specific_cost(cost_id: int,user: Users = Depends(get_current_user), db: Session = Depends(get_db)):
     cost = db.query(Costs).filter_by(id=cost_id).first()
 
     if not cost:

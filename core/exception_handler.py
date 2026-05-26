@@ -2,7 +2,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI
 
-from exceptions import ExpenseNotFoundException, UnauthorizedException
+from core.exceptions import ExpenseNotFoundException, UnauthorizedException
 
 
 def register_exception_handlers(app: FastAPI):
