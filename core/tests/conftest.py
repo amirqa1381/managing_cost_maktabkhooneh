@@ -1,7 +1,11 @@
+import os
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+
 import pytest
 from faker import Faker
 from fastapi.testclient import TestClient
-from core.database_test import Base, create_engine, sessionmaker, get_db
+from core.database import Base, create_engine, sessionmaker, get_db
 from sqlalchemy.pool import StaticPool
 from core.main import app
 from core.models import Users, Costs
@@ -95,5 +99,4 @@ def generate_mock_data(db_session):
     print(f"added 10 task for user_id : {user.id}")
     
     
-
 

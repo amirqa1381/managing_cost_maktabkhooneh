@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi_swagger import patch_fastapi
 from core.schemas import CostRead, CostCreate, CostUpdate
 from core.models import Costs, Users
-from core.database_test import get_db
+from core.database import get_db
 from core.users_routes import router as user_routes
 from core.jwt_auth import get_current_user
 from core.exception_handler import register_exception_handlers

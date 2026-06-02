@@ -35,6 +35,7 @@ passlib==1.7.4
 pathspec==1.1.1
 platformdirs==4.9.6
 pluggy==1.6.0
+psycopg2-binary==2.9.10
 pyasn1==0.6.3
 pycodestyle==2.14.0
 pycparser==3.0

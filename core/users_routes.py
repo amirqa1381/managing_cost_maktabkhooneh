@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Response, Cookie
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from core.database_test import get_db
+from core.database import get_db
 from core.exceptions import UnauthorizedException
 from core.schemas import UserRegisterSchema
 from core.models import Users, RefreshToken

@@ -5,7 +5,7 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from core.database_test import get_db
+from core.database import get_db
 from core.models import Users
 
 load_dotenv()
