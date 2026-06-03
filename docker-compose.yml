@@ -44,6 +44,16 @@ services:
       retries: 10
     restart: unless-stopped
 
+  locust:
+    image: locustio/locust
+    ports:
+     - "8089:8089"
+    volumes:
+      - ./core/locust:/mnt/locust
+    depends_on:
+      - api
+    command: -f /mnt/locust/locustfile.py -H http://api:8000
+
 volumes:
   postgres_data:
   redis_data:
